@@ -1,7 +1,4 @@
-hello
-world
-hi
+hello 42gs!
+hello skang
 
-
-world    
-
+end of file
