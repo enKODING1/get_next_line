@@ -23,13 +23,11 @@
 # include <stdlib.h>
 # include <unistd.h>
 
-char	*ft_substr(char const *s, unsigned int start, size_t len);
-char	*ft_strjoin(char const *s1, char const *s2);
 char	*get_next_line(int fd);
 
-size_t	ft_strlcpy(char *dest, const char *src, size_t n);
-size_t	ft_strlen(const char *s);
-char	*ft_strcat(char *dest, char *src);
-char	*ft_strdup(const char *s);
-char	*ft_strchr(const char *s, int c);
+size_t	gnl_strlcpy(char *dest, const char *src, size_t n);
+size_t	gnl_strlen(const char *s);
+char	*gnl_strcat(char *dest, char *src);
+char	*gnl_strdup(const char *s);
+char	*gnl_strchr(const char *s, int c);
 #endif
