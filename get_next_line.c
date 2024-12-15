@@ -6,7 +6,7 @@
 /*   By: skang <marvin@42.fr>                       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/03 15:42:20 by skang             #+#    #+#             */
-/*   Updated: 2024/12/14 17:35:51 by skang            ###   ########.fr       */
+/*   Updated: 2024/12/15 19:10:49 by skang            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,15 +49,37 @@ static char	*gnl_strjoin(char const *s1, char const *s2)
 	return (join_str);
 }
 
+static void	free_ptr(char **ptr)
+{
+	free(*ptr);
+	*ptr = NULL;
+}
+
+static char	*split_stash_by_newline(char **stash)
+{
+	char	*result;
+	char	*newline_addr;
+	char	*temp_stash;
+	int		newline_index;
+
+	temp_stash = *stash;
+	newline_addr = gnl_strchr(*stash, '\n');
+	newline_index = (++newline_addr) - *stash;
+	result = gnl_substr(*stash, 0, newline_index);
+	*stash = gnl_substr(*stash, newline_index, gnl_strlen(*stash));
+	free_ptr(&temp_stash);
+	return (result);
+}
+
 char	*get_next_line(int fd)
 {
 	static char	*stash;
-	char		*result;
+	char		*temp_stash;
 	char		buffer[BUFFER_SIZE + 1];
 	ssize_t		buffer_read;
-	char		*escape_location;
-	int			escape_index;
 
+	if (fd < 0 || BUFFER_SIZE <= 0)
+		return (NULL);
 	buffer_read = 1;
 	while (!(gnl_strchr(stash, '\n')) && (buffer_read > 0))
 	{
@@ -66,11 +88,11 @@ char	*get_next_line(int fd)
 		if (stash == NULL)
 			stash = gnl_strjoin(buffer, "");
 		else
+		{
+			temp_stash = stash;
 			stash = gnl_strjoin(stash, buffer);
+			free_ptr(&temp_stash);
+		}
 	}
-	escape_location = gnl_strchr(stash, '\n');
-	escape_index = (++escape_location) - stash;
-	result = gnl_substr(stash, 0, escape_index);
-	stash = gnl_substr(stash, escape_index, gnl_strlen(stash));
-	return (result);
+	return (split_stash_by_newline(&stash));
 }
