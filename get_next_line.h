@@ -6,7 +6,7 @@
 /*   By: skang <marvin@42.fr>                       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/03 15:30:33 by skang             #+#    #+#             */
-/*   Updated: 2024/12/14 17:34:36 by skang            ###   ########.fr       */
+/*   Updated: 2024/12/15 21:38:55 by skang            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,9 +17,7 @@
 #  define BUFFER_SIZE 42
 # endif
 
-# include <fcntl.h>
 # include <stddef.h>
-# include <stdio.h>
 # include <stdlib.h>
 # include <unistd.h>
 
