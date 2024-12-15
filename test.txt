@@ -1,6 +1,0 @@
-hello world!
-42gs
-
-paris
-endof file!!
-hi
