@@ -1,4 +1,6 @@
-hello 42gs!
-hello skang
+hello world!
+42gs
 
-end of file
+paris
+endof file!!
+hi
