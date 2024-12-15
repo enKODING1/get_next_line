@@ -6,7 +6,7 @@
 /*   By: skang <marvin@42.fr>                       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/03 15:42:20 by skang             #+#    #+#             */
-/*   Updated: 2024/12/15 19:10:49 by skang            ###   ########.fr       */
+/*   Updated: 2024/12/15 21:02:58 by skang            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,12 +49,6 @@ static char	*gnl_strjoin(char const *s1, char const *s2)
 	return (join_str);
 }
 
-static void	free_ptr(char **ptr)
-{
-	free(*ptr);
-	*ptr = NULL;
-}
-
 static char	*split_stash_by_newline(char **stash)
 {
 	char	*result;
@@ -67,32 +61,53 @@ static char	*split_stash_by_newline(char **stash)
 	newline_index = (++newline_addr) - *stash;
 	result = gnl_substr(*stash, 0, newline_index);
 	*stash = gnl_substr(*stash, newline_index, gnl_strlen(*stash));
-	free_ptr(&temp_stash);
+	free(temp_stash);
+	temp_stash = NULL;
+	if (gnl_strlen(result) == 0 || !result)
+	{
+		free(result);
+		result = NULL;
+		return (NULL);
+	}
 	return (result);
+}
+
+static char	*get_read_line(int fd, char *stash, ssize_t *buffer_read)
+{
+	char	buffer[BUFFER_SIZE + 1];
+	char	*temp_stash;
+
+	*buffer_read = read(fd, buffer, BUFFER_SIZE);
+	if (*buffer_read <= 0)
+	{
+		free(stash);
+		stash = NULL;
+		return (NULL);
+	}
+	buffer[*buffer_read] = '\0';
+	if (stash == NULL)
+		stash = gnl_strjoin(buffer, "");
+	else
+	{
+		temp_stash = stash;
+		stash = gnl_strjoin(stash, buffer);
+		free(temp_stash);
+		temp_stash = NULL;
+	}
+	return (stash);
 }
 
 char	*get_next_line(int fd)
 {
 	static char	*stash;
-	char		*temp_stash;
-	char		buffer[BUFFER_SIZE + 1];
 	ssize_t		buffer_read;
 
 	if (fd < 0 || BUFFER_SIZE <= 0)
 		return (NULL);
 	buffer_read = 1;
 	while (!(gnl_strchr(stash, '\n')) && (buffer_read > 0))
-	{
-		buffer_read = read(fd, buffer, BUFFER_SIZE);
-		buffer[buffer_read] = '\0';
-		if (stash == NULL)
-			stash = gnl_strjoin(buffer, "");
-		else
-		{
-			temp_stash = stash;
-			stash = gnl_strjoin(stash, buffer);
-			free_ptr(&temp_stash);
-		}
-	}
+		stash = get_read_line(fd, stash, &buffer_read);
+	if (!stash)
+		return (NULL);
 	return (split_stash_by_newline(&stash));
 }
