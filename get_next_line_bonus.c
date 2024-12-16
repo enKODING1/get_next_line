@@ -58,15 +58,21 @@ static char	*split_stash_by_newline(char **stash)
 
 	temp_stash = *stash;
 	newline_addr = gnl_strchr(*stash, '\n');
-	newline_index = (++newline_addr) - *stash;
-	result = gnl_substr(*stash, 0, newline_index);
-	*stash = gnl_substr(*stash, newline_index, gnl_strlen(*stash));
+	if (newline_addr)
+	{
+		newline_index = (++newline_addr) - *stash;
+		result = gnl_substr(*stash, 0, newline_index);
+		*stash = gnl_substr(*stash, newline_index, gnl_strlen(*stash));
+	}
+	else
+	{
+		result = gnl_strdup(*stash);
+		*stash = NULL;
+	}
 	free(temp_stash);
-	temp_stash = NULL;
 	if (gnl_strlen(result) == 0 || !result)
 	{
 		free(result);
-		result = NULL;
 		return (NULL);
 	}
 	return (result);
@@ -78,21 +84,19 @@ static char	*get_read_line(int fd, char *stash, ssize_t *buffer_read)
 	char	*temp_stash;
 
 	*buffer_read = read(fd, buffer, BUFFER_SIZE);
-	if (*buffer_read <= 0)
+	if (*buffer_read < 0)
 	{
 		free(stash);
-		stash = NULL;
 		return (NULL);
 	}
 	buffer[*buffer_read] = '\0';
-	if (stash == NULL)
-		stash = gnl_strjoin(buffer, "");
+	if (!stash)
+		stash = gnl_strdup(buffer);
 	else
 	{
 		temp_stash = stash;
 		stash = gnl_strjoin(stash, buffer);
 		free(temp_stash);
-		temp_stash = NULL;
 	}
 	return (stash);
 }
@@ -105,9 +109,13 @@ char	*get_next_line(int fd)
 	if (fd < 0 || BUFFER_SIZE <= 0)
 		return (NULL);
 	buffer_read = 1;
-	while (!(gnl_strchr(stash[fd], '\n')) && (buffer_read > 0))
+	while (!gnl_strchr(stash[fd], '\n') && buffer_read > 0)
 		stash[fd] = get_read_line(fd, stash[fd], &buffer_read);
-	if (!stash[fd])
+	if (!stash[fd] || (buffer_read == 0 && gnl_strlen(stash[fd]) == 0))
+	{
+		free(stash[fd]);
+		stash[fd] = NULL;
 		return (NULL);
+	}
 	return (split_stash_by_newline(&stash[fd]));
 }
