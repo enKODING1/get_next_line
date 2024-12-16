@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   get_next_line.c                                    :+:      :+:    :+:   */
+/*   get_next_line_bonus.c                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: skang <marvin@42.fr>                       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/03 15:42:20 by skang             #+#    #+#             */
-/*   Updated: 2024/12/15 21:02:58 by skang            ###   ########.fr       */
+/*   Updated: 2024/12/16 18:56:28 by skang            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,13 +80,17 @@ static char	*split_stash_by_newline(char **stash)
 
 static char	*get_read_line(int fd, char *stash, ssize_t *buffer_read)
 {
-	char	buffer[BUFFER_SIZE + 1];
+	char	*buffer;
 	char	*temp_stash;
 
+	buffer = (char *)malloc(sizeof(char) * (BUFFER_SIZE + 1));
+	if (!buffer)
+		return (NULL);
 	*buffer_read = read(fd, buffer, BUFFER_SIZE);
 	if (*buffer_read < 0)
 	{
 		free(stash);
+		free(buffer);
 		return (NULL);
 	}
 	buffer[*buffer_read] = '\0';
@@ -98,6 +102,7 @@ static char	*get_read_line(int fd, char *stash, ssize_t *buffer_read)
 		stash = gnl_strjoin(stash, buffer);
 		free(temp_stash);
 	}
+	free(buffer);
 	return (stash);
 }
 
